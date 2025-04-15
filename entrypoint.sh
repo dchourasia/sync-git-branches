@@ -76,6 +76,11 @@ esac
 
 git push origin ${DOWNSTREAM_BRANCH}
 
+if [[ -e .gitattributes ]]
+then
+  cp .gitattributes .gitattributes_org
+fi
+
 IFS=', ' read -r -a exclusions <<< "$IGNORE_FILES"
 for exclusion in "${exclusions[@]}"
 do
@@ -87,6 +92,12 @@ done
 MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH})
 
 rm -rf .gitattributes
+
+if [[ -e .gitattributes_org ]]
+then
+  mv .gitattributes_org .gitattributes
+fi
+
 
 if [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]]
 then
