@@ -84,21 +84,11 @@ do
    echo "$exclusion merge=ours" >> .git/info/attributes
    cat .git/info/attributes
 done
+   echo ".editorconfig merge=ours" >> .git/info/attributes
+   cat .git/info/attributes
 
 MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
 
-
-
-
-
-if [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]] || [[ $MERGE_RESULT == *"error"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]]
-then
-  exit 1
-elif [[ $MERGE_RESULT != *"Already up to date."* ]]
-then
-  git commit -m "Merged upstream"
-  git push ${PUSH_ARGS} origin ${DOWNSTREAM_BRANCH} || exit $?
-fi
-
+cat .editorconfig
 cd ..
 rm -rf work
