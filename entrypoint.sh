@@ -89,7 +89,7 @@ MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
 
 echo $MERGE_RESULT
 
-if [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]] || [[ $MERGE_RESULT == *"error:"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]]
+if [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]] || [[ $MERGE_RESULT == *"error:"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]] || [[ $MERGE_RESULT == *"CONFLICT ("* ]]
 then
   exit 1
 elif [[ $MERGE_RESULT != *"Already up to date."* ]]
