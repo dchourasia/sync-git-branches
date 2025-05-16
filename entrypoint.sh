@@ -13,6 +13,7 @@ SPAWN_LOGS=$8
 DOWNSTREAM_REPO=$9
 IGNORE_FILES=${10}
 UPSTREAM_SSH_KEY=${11}
+UPSTREAM_TAG=${12}
 
 if [[ -z "$UPSTREAM_REPO" ]]; then
   echo "Missing \$UPSTREAM_REPO"
@@ -78,7 +79,7 @@ EOF
 fi
 
 git remote add upstream "$UPSTREAM_REPO"
-git fetch ${FETCH_ARGS} upstream
+git fetch ${FETCH_ARGS} upstream --tags
 git remote -v
 
 git checkout origin/${DOWNSTREAM_BRANCH}
@@ -104,7 +105,13 @@ do
    cat .git/info/attributes
 done
 
-MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
+if [[ -n "$UPSTREAM_TAG" ]]; then
+  echo "UPSTREAM_TAG=$UPSTREAM_TAG"
+  echo "Upstream tag is defined, pulling from tag $UPSTREAM_TAG instead of branch $UPSTREAM_BRANCH"
+  MERGE_RESULT=$(git merge ${MERGE_ARGS} tags/${UPSTREAM_TAG} 2>&1)
+else
+  MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
+fi
 
 echo $MERGE_RESULT
 

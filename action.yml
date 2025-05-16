@@ -45,6 +45,10 @@ inputs:
     description: SSH key with read permissions on upstream repo
     required: false
     default: ""
+  upstream_tag:
+    description: Upstream tag to sync from. Note this overrides the upstream branch option.
+    required: false
+    default: ""
 
 runs:
   using: "docker"
@@ -61,6 +65,7 @@ runs:
     - ${{ inputs.downstream_repo }}
     - ${{ inputs.ignore_files }}
     - ${{ inputs.upstream_ssh_key }}
+    - ${{ inputs.upstream_tag }}
 
 branding:
   icon: "git-merge"
