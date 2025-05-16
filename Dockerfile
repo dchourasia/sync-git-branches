@@ -4,7 +4,8 @@ RUN apk add --no-cache \
 	bash \
 	git \
 	curl \
-	jq
+	jq \
+  openssh-client
 
 RUN adduser -D ci
 

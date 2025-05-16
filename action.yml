@@ -41,6 +41,10 @@ inputs:
     description: Comma separated list of globbing paths which needs to be ignored while merge
     required: false
     default: ""
+  upstream_ssh_key:
+    description: SSH key with read permissions on upstream repo
+    required: false
+    default: ""
 
 runs:
   using: "docker"
@@ -56,6 +60,7 @@ runs:
     - ${{ inputs.spawn_logs }}
     - ${{ inputs.downstream_repo }}
     - ${{ inputs.ignore_files }}
+    - ${{ inputs.upstream_ssh_key }}
 
 branding:
   icon: "git-merge"
