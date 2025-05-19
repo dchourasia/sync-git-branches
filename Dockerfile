@@ -7,16 +7,10 @@ RUN apk add --no-cache \
 	jq \
   openssh-client
 
-RUN adduser -D ci
+WORKDIR /script
 
-RUN mkdir /home/ci/.ssh
-ADD *.sh /home/ci/
+ADD *.sh /script
+RUN chmod 555 /script/*.sh
+ADD known_hosts /script
 
-ADD known_hosts /home/ci/.ssh
-RUN chown -R ci: /home/ci
-RUN chmod 555 /home/ci/*.sh 
-RUN chmod 700 /home/ci/.ssh
-
-USER ci
-
-ENTRYPOINT ["/home/ci/entrypoint.sh"]
+ENTRYPOINT ["/script/entrypoint.sh"]

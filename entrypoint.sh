@@ -66,8 +66,7 @@ if [[ -n "$UPSTREAM_SSH_KEY" ]]; then
   echo "$UPSTREAM_SSH_KEY" > $HOME/.ssh/upstream_ssh_key
   chmod 600 $HOME/.ssh/upstream_ssh_key
 
-  cat $HOME/.ssh/known_hosts  
-  export GIT_SSH_COMMAND="ssh -i ~/.ssh/upstream_ssh_key"
+  export GIT_SSH_COMMAND="ssh -i ~/.ssh/upstream_ssh_key -o UserKnownHostsFile=/script/known_hosts"
   # convert upstream repo to a ssh-based URI
   UPSTREAM_REPO=$(echo "$UPSTREAM_REPO" | sed -E 's|https://.*github.com/(.*)/(.*).git|git@github.com:\1/\2.git|')
 fi
