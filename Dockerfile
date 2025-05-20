@@ -4,12 +4,13 @@ RUN apk add --no-cache \
 	bash \
 	git \
 	curl \
-	jq
+	jq \
+  openssh-client
 
-RUN adduser -D ci
+WORKDIR /script
 
-ADD *.sh /home/ci/
+ADD *.sh /script
+RUN chmod 555 /script/*.sh
+ADD known_hosts /script
 
-RUN chmod 555 /home/ci/*.sh 
-
-ENTRYPOINT ["/home/ci/entrypoint.sh"]
+ENTRYPOINT ["/script/entrypoint.sh"]

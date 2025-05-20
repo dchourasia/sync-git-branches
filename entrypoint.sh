@@ -12,6 +12,8 @@ PUSH_ARGS=$7
 SPAWN_LOGS=$8
 DOWNSTREAM_REPO=$9
 IGNORE_FILES=${10}
+UPSTREAM_SSH_KEY=${11}
+UPSTREAM_TAG=${12}
 
 if [[ -z "$UPSTREAM_REPO" ]]; then
   echo "Missing \$UPSTREAM_REPO"
@@ -58,8 +60,19 @@ git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 git config --local user.password ${GITHUB_TOKEN}
 git config --global merge.ours.driver true
 
+if [[ -n "$UPSTREAM_SSH_KEY" ]]; then
+  mkdir -p "$HOME/.ssh"
+  chmod 700 $HOME/.ssh
+  echo "$UPSTREAM_SSH_KEY" > $HOME/.ssh/upstream_ssh_key
+  chmod 600 $HOME/.ssh/upstream_ssh_key
+
+  export GIT_SSH_COMMAND="ssh -i ~/.ssh/upstream_ssh_key -o UserKnownHostsFile=/script/known_hosts"
+  # convert upstream repo to a ssh-based URI
+  UPSTREAM_REPO=$(echo "$UPSTREAM_REPO" | sed -E 's|https://.*github.com/(.*)/(.*).git|git@github.com:\1/\2.git|')
+fi
+
 git remote add upstream "$UPSTREAM_REPO"
-git fetch ${FETCH_ARGS} upstream
+git fetch ${FETCH_ARGS} upstream --tags
 git remote -v
 
 git checkout origin/${DOWNSTREAM_BRANCH}
@@ -85,7 +98,13 @@ do
    cat .git/info/attributes
 done
 
-MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
+if [[ -n "$UPSTREAM_TAG" ]]; then
+  echo "UPSTREAM_TAG=$UPSTREAM_TAG"
+  echo "Upstream tag is defined, pulling from tag $UPSTREAM_TAG instead of branch $UPSTREAM_BRANCH"
+  MERGE_RESULT=$(git merge ${MERGE_ARGS} tags/${UPSTREAM_TAG} 2>&1)
+else
+  MERGE_RESULT=$(git merge ${MERGE_ARGS} upstream/${UPSTREAM_BRANCH} 2>&1)
+fi
 
 echo $MERGE_RESULT
 
