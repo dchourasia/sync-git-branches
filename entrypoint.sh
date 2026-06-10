@@ -150,7 +150,7 @@ if [[ $MERGE_RESULT == *"CONFLICT ("* ]]; then
   echo "All conflicts on excluded files resolved"
   git commit --no-edit -m "Merged upstream"
   git push ${PUSH_ARGS} origin ${DOWNSTREAM_BRANCH} || exit $?
-elif [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]] || [[ $MERGE_RESULT == *"error:"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]]; then
+elif [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"error:"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]]; then
   exit 1
 elif [[ $MERGE_RESULT != *"Already up to date."* ]]; then
   git commit -m "Merged upstream"
