@@ -98,6 +98,41 @@ do
    cat .git/info/attributes
 done
 
+DOWNSTREAM_HEAD=$(git rev-parse HEAD)
+
+restore_excluded_files() {
+  if [[ -z "$IGNORE_FILES" ]]; then
+    return
+  fi
+
+  local needs_amend=false
+
+  while IFS=$'\t' read -r status file; do
+    [[ -z "$status" ]] && continue
+    local matched=false
+    for exclusion in "${exclusions[@]}"; do
+      if [[ "$file" == $exclusion ]]; then
+        matched=true
+        break
+      fi
+    done
+
+    if $matched; then
+      echo "Restoring excluded file to downstream state: $file"
+      if [[ "$status" == "A" ]]; then
+        git rm -f "$file"
+      else
+        git checkout "$DOWNSTREAM_HEAD" -- "$file"
+      fi
+      needs_amend=true
+    fi
+  done <<< "$(git diff --name-status "$DOWNSTREAM_HEAD" HEAD)"
+
+  if $needs_amend; then
+    git commit --amend --no-edit
+  fi
+}
+
 if [[ -n "$UPSTREAM_TAG" ]]; then
   echo "UPSTREAM_TAG=$UPSTREAM_TAG"
   echo "Upstream tag is defined, pulling from tag $UPSTREAM_TAG instead of branch $UPSTREAM_BRANCH"
@@ -149,11 +184,13 @@ if [[ $MERGE_RESULT == *"CONFLICT ("* ]]; then
 
   echo "All conflicts on excluded files resolved"
   git commit --no-edit -m "Merged upstream"
+  restore_excluded_files
   git push ${PUSH_ARGS} origin ${DOWNSTREAM_BRANCH} || exit $?
 elif [[ $MERGE_RESULT == "" ]] || [[ $MERGE_RESULT == *"merge failed"* ]] || [[ $MERGE_RESULT == *"error:"* ]] || [[ $MERGE_RESULT == *"Aborting"* ]]; then
   exit 1
 elif [[ $MERGE_RESULT != *"Already up to date."* ]]; then
   git commit -m "Merged upstream"
+  restore_excluded_files
   git push ${PUSH_ARGS} origin ${DOWNSTREAM_BRANCH} || exit $?
 fi
 
